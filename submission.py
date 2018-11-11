@@ -1,17 +1,35 @@
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
+from argparse import ArgumentParser
 from sklearn.externals import joblib
 from pandas import read_csv
 from pprint import pprint
 from scipy import *
 
-if __name__ == "__main__":
-    regrPath = input("Input path to random forest to load: ")
-    testPath = input("Input path to testing features: ")
+import os
+import warnings
 
-    regr = joblib.load(regrPath)
-    test = read_csv(testPath)
-    labels = read_csv("../data/given_data/submission_format.csv")
+warnings.filterwarnings(action="ignore", module="scipy", message="^internal gelsd")
+
+def create_parser():
+    usage = "python3 clean.py [regr] [test] [save]"
+    parser = ArgumentParser(usage=usage)
+
+    parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store")
+    parser.add_argument("regr", help="filepath of regression you want to use",
+                    action="store")
+    parser.add_argument("test", help="filepath of test data", action="store")
+    parser.add_argument("save", help="filepath and name to save csv file", action="store")
+
+    args = parser.parse_args()
+
+    return args
+
+def create_submission(args):
+    regr = joblib.load(args.regr)
+    test = read_csv(args.test)
+    labels = read_csv("data/given_data/submission_format.csv")
 
     # change city into numerical data
     for counter in range(len(test)):
@@ -28,4 +46,9 @@ if __name__ == "__main__":
     labels.total_cases.round()
     labels['total_cases'] = labels['total_cases'].astype(int)
 
-    labels.to_csv('../data/submission.csv', sep = ',', encoding = 'utf-8', index = False)
+    labels.to_csv(args.save, sep = ',', encoding = 'utf-8', index = False)
+
+if __name__ == "__main__":
+
+    args = create_parser()
+    create_submission(args)

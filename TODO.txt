@@ -1,0 +1,13 @@
+TODO feature selection
+TODO play around with RF parameters
+
+TODO create XGBoost
+
+
+possible smoothing of the interpolation (compromise)
+increase depth, increase the number of trees to offset overfitting
+just play around with the parameters and see which one is
+rotation forest
+
+DONE:
+TODO train RF on no null removed rows (DONE, worse than others)

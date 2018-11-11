@@ -2,10 +2,10 @@ from scipy.optimize import curve_fit
 from scipy import linalg
 from pprint import pprint
 from argparse import ArgumentParser
+from pandas import read_csv
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 import math
 import random
@@ -35,7 +35,7 @@ def create_parser():
 
 # CHANGE THIS METHOD BASED ON THE LINEAR REGRESSION CODE
 def fill(args):
-    data = pd.read_csv(args.data)
+    data = read_csv(args.data)
 
     for counter1, row in data.iterrows():
         for counter2, col in data.iteritems():
