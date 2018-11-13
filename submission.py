@@ -38,7 +38,24 @@ def create_submission(args):
         else:
             test.at[counter,'city'] = 1
 
+    # drop week_start_date since its pretty much the same as weekofyear
     test.drop(['week_start_date'], axis=1, inplace=True)
+
+    # drop some features for experimenting
+    # ex: 'city','week_start_date','ndvi_ne','ndvi_nw','ndvi_se','ndvi_sw'
+    test.drop(['year'], axis=1, inplace=True)
+
+    # test.drop(['reanalysis_specific_humidity_g_per_kg'], axis=1, inplace=True)
+    # test.drop(['reanalysis_max_air_temp_k'], axis=1, inplace=True)
+    # test.drop(['station_diur_temp_rng_c'], axis=1, inplace=True)
+    test.drop(['station_avg_temp_c'], axis=1, inplace=True)
+    test.drop(['precipitation_amt_mm'], axis=1, inplace=True)
+    test.drop(['station_min_temp_c'], axis=1, inplace=True)
+    test.drop(['reanalysis_sat_precip_amt_mm'], axis=1, inplace=True)
+    test.drop(['reanalysis_min_air_temp_k'], axis=1, inplace=True)
+    test.drop(['reanalysis_relative_humidity_percent'], axis=1, inplace=True)
+    test.drop(['ndvi_nw'], axis=1, inplace=True)
+    test.drop(['reanalysis_avg_temp_k'], axis=1, inplace=True)
 
     print('\nPredicting')
 

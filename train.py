@@ -41,9 +41,25 @@ def train_rf(args):
         else:
             data.at[counter,'city'] = 1
 
+    #drop week_start_date since it's pretty much the same as weekofyear
+    data.drop(['week_start_date'], axis=1, inplace=True)
+
     # drop some features for experimenting
     # ex: 'city','week_start_date','ndvi_ne','ndvi_nw','ndvi_se','ndvi_sw'
-    data.drop(['week_start_date'], axis=1, inplace=True)
+    data.drop(['year'], axis=1, inplace=True)
+
+    # data.drop(['reanalysis_specific_humidity_g_per_kg'], axis=1, inplace=True)
+    # data.drop(['reanalysis_max_air_temp_k'], axis=1, inplace=True)
+    # data.drop(['station_diur_temp_rng_c'], axis=1, inplace=True)
+    data.drop(['station_avg_temp_c'], axis=1, inplace=True)
+    data.drop(['precipitation_amt_mm'], axis=1, inplace=True)
+    data.drop(['station_min_temp_c'], axis=1, inplace=True)
+    data.drop(['reanalysis_sat_precip_amt_mm'], axis=1, inplace=True)
+    data.drop(['reanalysis_min_air_temp_k'], axis=1, inplace=True)
+    data.drop(['reanalysis_relative_humidity_percent'], axis=1, inplace=True)
+    data.drop(['ndvi_nw'], axis=1, inplace=True)
+    data.drop(['reanalysis_avg_temp_k'], axis=1, inplace=True)
+
 
     # randomly determine if row is training or testing and separate the data
     data['is_train'] = np.random.uniform(0, 1, len(data)) <= .8
@@ -83,8 +99,8 @@ def train_rf(args):
     # print("\nAccuracy: {}".format(100*(correct/len(test))))
     print("Average difference: {}".format(total_diff/len(test)))
 
+
     # prints feature ranking
-    '''
     print("\nFeature ranking:")
 
     importances = regr.feature_importances_
@@ -96,8 +112,6 @@ def train_rf(args):
     for f in range(testnocases.shape[1]):
         if (importances[indices[f]] > 0.005):
             print("%d. feature %s (%f)" % (f + 1, testnocases.columns.values[indices[f]], importances[indices[f]]))
-    '''
-
 
     joblib.dump(regr, args.name)
 
