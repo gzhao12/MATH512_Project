@@ -9,5 +9,7 @@ increase depth, increase the number of trees to offset overfitting
 just play around with the parameters and see which one is
 rotation forest
 
+Maybe try and bag a bunch of different random forests with different parameters
+
 DONE:
 TODO train RF on no null removed rows (DONE, worse than others)
