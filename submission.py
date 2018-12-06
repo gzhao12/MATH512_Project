@@ -2,14 +2,14 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from argparse import ArgumentParser
 from sklearn.externals import joblib
-from pandas import read_csv
+import pandas as pd
 from pprint import pprint
 from scipy import *
+from warnings import filterwarnings
 
 import os
-import warnings
 
-warnings.filterwarnings(action="ignore", module="scipy", message="^internal gelsd")
+filterwarnings('ignore')
 
 def create_parser():
     usage = "python3 clean.py [regr] [test] [save]"
@@ -27,43 +27,60 @@ def create_parser():
     return args
 
 def create_submission(args):
-    regr = joblib.load(args.regr)
-    test = read_csv(args.test)
-    labels = read_csv("data/given_data/submission_format.csv")
-
-    # change city into numerical data
-    for counter in range(len(test)):
-        if test.at[counter,'city'] == "sj":
-            test.at[counter,'city'] = 0
-        else:
-            test.at[counter,'city'] = 1
+    sj_regr = joblib.load(args.regr + "_sj")
+    iq_regr = joblib.load(args.regr + "_iq")
+    test = pd.read_csv(args.test, index_col=[0,1])
+    labels = pd.read_csv("data/given_data/submission_format.csv")
 
     # drop week_start_date since its pretty much the same as weekofyear
     test.drop(['week_start_date'], axis=1, inplace=True)
 
+    sj_test = test.loc['sj']
+    iq_test = test.loc['iq']
+
     # drop some features for experimenting
     # ex: 'city','week_start_date','ndvi_ne','ndvi_nw','ndvi_se','ndvi_sw'
-    test.drop(['year'], axis=1, inplace=True)
+
+    sj_test.drop(['station_diur_temp_rng_c'], axis=1, inplace=True)
+    sj_test.drop(['precipitation_amt_mm'], axis=1, inplace=True)
+    sj_test.drop(['station_precip_mm'], axis=1, inplace=True)
+    sj_test.drop(['reanalysis_sat_precip_amt_mm'], axis=1, inplace=True)
+
+    iq_test.drop(['ndvi_se'], axis=1, inplace=True)
+    iq_test.drop(['ndvi_ne'], axis=1, inplace=True)
+    iq_test.drop(['ndvi_sw'], axis=1, inplace=True)
+    iq_test.drop(['ndvi_nw'], axis=1, inplace=True)
+    iq_test.drop(['station_precip_mm'], axis=1, inplace=True)
 
     # test.drop(['reanalysis_specific_humidity_g_per_kg'], axis=1, inplace=True)
     # test.drop(['reanalysis_max_air_temp_k'], axis=1, inplace=True)
     # test.drop(['station_diur_temp_rng_c'], axis=1, inplace=True)
-    test.drop(['station_avg_temp_c'], axis=1, inplace=True)
-    test.drop(['precipitation_amt_mm'], axis=1, inplace=True)
-    test.drop(['station_min_temp_c'], axis=1, inplace=True)
-    test.drop(['reanalysis_sat_precip_amt_mm'], axis=1, inplace=True)
-    test.drop(['reanalysis_min_air_temp_k'], axis=1, inplace=True)
-    test.drop(['reanalysis_relative_humidity_percent'], axis=1, inplace=True)
-    test.drop(['ndvi_nw'], axis=1, inplace=True)
-    test.drop(['reanalysis_avg_temp_k'], axis=1, inplace=True)
+
+    # test.drop(['year'], axis=1, inplace=True)
+    #
+    # test.drop(['station_avg_temp_c'], axis=1, inplace=True)
+    # test.drop(['precipitation_amt_mm'], axis=1, inplace=True)
+    # test.drop(['station_min_temp_c'], axis=1, inplace=True)
+    # test.drop(['reanalysis_sat_precip_amt_mm'], axis=1, inplace=True)
+    # test.drop(['reanalysis_min_air_temp_k'], axis=1, inplace=True)
+    # test.drop(['reanalysis_relative_humidity_percent'], axis=1, inplace=True)
+    # test.drop(['ndvi_nw'], axis=1, inplace=True)
+    # test.drop(['reanalysis_avg_temp_k'], axis=1, inplace=True)
 
     print('\nPredicting')
 
-    labels['total_cases'] = regr.predict(test)
-    labels.total_cases.round()
-    labels['total_cases'] = labels['total_cases'].astype(int)
+    sj_cases = pd.Series(sj_regr.predict(sj_test))
+    iq_cases = pd.Series(iq_regr.predict(iq_test))
 
+    predictions = pd.concat([sj_cases, iq_cases], ignore_index=True)
+    predictions.round()
+    predictions = predictions.astype(int)
+
+    labels['total_cases'] = predictions.values
+
+    # print(labels)
     labels.to_csv(args.save, sep = ',', encoding = 'utf-8', index = False)
+
 
 if __name__ == "__main__":
 
